@@ -50,3 +50,18 @@ def questions_menu():
     )
 
     return builder
+
+
+def questions_back():
+    builder = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Назад",
+                    callback_data="question_back",
+                ),
+            ],
+        ]
+    )
+
+    return builder
