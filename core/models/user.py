@@ -13,4 +13,6 @@ class User(Base):
     admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
     premium: Mapped[bool] = mapped_column(Boolean, default=False)
-    buy_premium: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    buy_premium: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
