@@ -24,6 +24,7 @@ async def update_premium(
 
     return user
 
+
 async def del_referrer(
     session: AsyncSession,
     telegram_id: int,
