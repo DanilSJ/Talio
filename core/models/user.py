@@ -1,5 +1,5 @@
-from sqlalchemy import String, BigInteger, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, BigInteger, Boolean, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import DateTime
 from datetime import datetime
 
@@ -15,4 +15,18 @@ class User(Base):
     premium: Mapped[bool] = mapped_column(Boolean, default=False)
     buy_premium: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+
+    referrer_is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    referrer_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("users.id"), nullable=True
+    )
+
+    referrer: Mapped["User"] = relationship(
+        "User", remote_side="User.id", back_populates="referral_users", uselist=False
+    )
+
+    referral_users: Mapped[list["User"]] = relationship(
+        "User", back_populates="referrer", cascade="all, delete-orphan"
     )
