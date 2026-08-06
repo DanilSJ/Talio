@@ -35,3 +35,7 @@ class User(Base):
     request_reload: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+    messages: Mapped[list["Message"]] = relationship(
+        "Message", back_populates="user", cascade="all, delete-orphan"
+    )
