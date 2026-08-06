@@ -32,4 +32,6 @@ class User(Base):
     )
 
     request_limit: Mapped[int] = mapped_column(Integer, nullable=True)
-    request_reload: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    request_reload: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
