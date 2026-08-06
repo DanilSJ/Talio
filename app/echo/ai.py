@@ -3,7 +3,7 @@ from core.config import settings
 
 
 class AI:
-    def __init__(self, prompt: str, system_prompt: str, history):
+    def __init__(self, prompt: str, system_prompt: str, history, limit: int = 10):
         self.client = AsyncClient(
             base_url=settings.DEEPSEEK_BASE_URL,
             api_key=settings.DEEPSEEK_API_KEY,
@@ -11,11 +11,15 @@ class AI:
         self.prompt = prompt
         self.history = history
         self.system_prompt = system_prompt
+        self.limit = limit
 
     async def send(self):
         messages = [{"role": "system", "content": self.system_prompt}]
 
-        for el in self.history:
+        # Берем только последние limit сообщений из истории
+        history_slice = self.history[-self.limit :] if self.limit > 0 else []
+
+        for el in history_slice:
             messages.append(
                 {
                     "role": "user",
