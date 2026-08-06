@@ -13,16 +13,33 @@ class AI:
         self.system_prompt = system_prompt
 
     async def send(self):
-        result = await self.client.chat.completions.create(
-            model="deepseek-v4-flash",
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                self.history,
+        messages = [{"role": "system", "content": self.system_prompt}]
+
+        for el in self.history:
+            messages.append(
                 {
                     "role": "user",
-                    "content": self.prompt,
-                },
-            ],
+                    "content": el.question,
+                }
+            )
+            if el.answer:
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": el.answer,
+                    }
+                )
+
+        messages.append(
+            {
+                "role": "user",
+                "content": self.prompt,
+            }
+        )
+
+        result = await self.client.chat.completions.create(
+            model="deepseek-v4-flash",
+            messages=messages,
         )
 
         return result.choices[0].message.content
