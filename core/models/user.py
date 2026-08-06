@@ -1,4 +1,4 @@
-from sqlalchemy import String, BigInteger, Boolean, ForeignKey
+from sqlalchemy import String, BigInteger, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import DateTime
 from datetime import datetime
@@ -30,3 +30,6 @@ class User(Base):
     referral_users: Mapped[list["User"]] = relationship(
         "User", back_populates="referrer", cascade="all, delete-orphan"
     )
+
+    request_limit: Mapped[int] = mapped_column(Integer, nullable=True)
+    request_reload: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
