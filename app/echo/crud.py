@@ -1,8 +1,8 @@
 from typing import Optional
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from core.models import User
+from sqlalchemy import select, desc
+from core.models import User, AI
 
 
 async def update_user_request_limits(
@@ -62,3 +62,11 @@ async def increment_user_request_limit(
     await session.refresh(user)
 
     return user
+
+
+async def ai_system_prompt(session: AsyncSession) -> str:
+    stmt = select(AI.system_prompt).order_by(desc(AI.id)).limit(1)
+    result = await session.execute(stmt)
+    system_prompt = result.scalar_one_or_none()
+
+    return system_prompt if system_prompt is not None else "default_prompt"
