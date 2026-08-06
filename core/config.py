@@ -16,5 +16,8 @@ class Settings(BaseSettings):
     DB_ECHO: bool = os.getenv("DB_ECHO", "False") == "False"
     DB_POOL_NULL: bool = os.getenv("DB_POOL_NULL", "False") == "True"
 
+    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY")
+    DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL")
+
 
 settings = Settings()
