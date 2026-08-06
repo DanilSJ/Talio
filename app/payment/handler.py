@@ -4,9 +4,10 @@ from aiogram.types import Message, CallbackQuery
 from yookassa import Payment
 import uuid
 
-from app.payment.crud import update_premium
+from app.payment.crud import update_premium, del_referrer
 from app.payment.keyboard import payment_keyboard
 from app.payment.state import PaymentState
+from app.start.crud import create_user
 from core.models import db_helper
 
 router = Router()
@@ -15,11 +16,20 @@ router = Router()
 @router.message(F.text == "💎 Premium подписка")
 async def create_payment(message: Message, state: FSMContext):
     try:
+        price = 500.00
+        async with db_helper.scoped_session_dependency() as session:
+            user = await create_user(
+                session, message.from_user.id, message.from_user.username
+            )
+
+            if user.referrer_is_active:
+                price = 350.00
+
         order_id = str(uuid.uuid4())
 
         payment = Payment.create(
             {
-                "amount": {"value": "500.00", "currency": "RUB"},
+                "amount": {"value": price, "currency": "RUB"},
                 "confirmation": {
                     "type": "redirect",
                     "return_url": "https://t.me/ваш_бот",
@@ -38,7 +48,7 @@ async def create_payment(message: Message, state: FSMContext):
         await state.set_state(PaymentState.payment_id)
         await state.update_data(payment_id=payment.id)
 
-        await message.answer(
+        return await message.answer(
             """💎 Для оплаты подписки перейдите по ссылке:\nПосле оплаты нажмите кнопку 'Проверить'""",
             reply_markup=payment_keyboard(confirmation_url),
         )
@@ -61,6 +71,7 @@ async def payment_check(callback: CallbackQuery, state: FSMContext):
         if payment.status == "succeeded":
             async with db_helper.scoped_session_dependency() as session:
                 await update_premium(session, callback.message.from_user.id)
+                await del_referrer(session, callback.message.from_user.id)
                 await callback.answer("✅ Платеж оплачен! Подписка активирована!")
         elif payment.status == "pending" or payment.status == "waiting_for_capture":
             await callback.answer("⏳ Платеж еще не оплачен")
