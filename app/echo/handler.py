@@ -58,7 +58,10 @@ async def echo(message: Message):
 
         if user.premium:
             ai = AI(
-                prompt=message.text, system_prompt=system_prompt, history=user.messages
+                prompt=message.text,
+                system_prompt=system_prompt,
+                history=user.messages,
+                limit=100,
             )
             result = await ai.send()
 
@@ -81,7 +84,11 @@ async def echo(message: Message):
                     "❌ У вас закончились запросы. Оформите Premium, чтобы продолжить общение."
                 )
 
-        ai = AI(prompt=message.text, system_prompt=system_prompt, history=user.messages)
+        ai = AI(
+            prompt=message.text,
+            system_prompt=system_prompt,
+            history=user.messages,
+        )
         result = await ai.send()
 
         await increment_user_request_limit(session, user.telegram_id)
