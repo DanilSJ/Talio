@@ -4,8 +4,11 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from core.config import settings
 from app import router
 
-session = AiohttpSession(proxy=settings.PROXY)
-bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, session=session)
+if settings.PROXY:
+    session = AiohttpSession(proxy=settings.PROXY)
+    bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, session=session)
+else:
+    bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 
 dp = Dispatcher()
 
