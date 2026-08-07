@@ -10,11 +10,12 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
+    BOT_USERNAME: str = os.getenv("BOT_USERNAME")
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN")
     PROXY: str = os.getenv("PROXY")
 
     db_url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
-    DB_ECHO: bool = os.getenv("DB_ECHO", "False") == "False"
+    DB_ECHO: bool = os.getenv("DB_ECHO", "False") == "True"
     DB_POOL_NULL: bool = os.getenv("DB_POOL_NULL", "False") == "True"
 
     DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY")
@@ -25,4 +26,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-Configuration.configure("<Account Id>", "<Secret Key>")
+Configuration.configure(settings.YOOKASSA_ID, settings.YOOKASSA_KEY)
