@@ -31,8 +31,7 @@ async def create_payment(message: Message, state: FSMContext):
 
             # Проверяем наличие активного реферера
             has_referrer = await has_active_referrer(session, message.from_user.id)
-            print(has_referrer)
-            # Определяем цену
+
             final_price = (
                 PRICE_WITH_REFERRER if has_referrer else PRICE_WITHOUT_REFERRER
             )
