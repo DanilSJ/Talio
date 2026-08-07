@@ -4,7 +4,7 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from core.config import settings
 from app import router
 
-if settings.PROXY != "False":
+if settings.PROXY:
     session = AiohttpSession(proxy=settings.PROXY)
     bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, session=session)
 else:
