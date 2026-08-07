@@ -67,22 +67,23 @@ async def echo(message: Message):
 
             return await message.answer(result)
 
-        if user.request_limit >= 3:
-            if datetime.now() >= user.request_reload:
-                await reset_user_requests(session, user.telegram_id, 1)
+        if user.request_limit is not None:
+            if user.request_limit >= 3:
+                if datetime.now() >= user.request_reload:
+                    await reset_user_requests(session, user.telegram_id, 1)
 
-                ai = AI(
-                    prompt=message.text,
-                    system_prompt=system_prompt,
-                    history=user.messages,
-                )
-                result = await ai.send()
+                    ai = AI(
+                        prompt=message.text,
+                        system_prompt=system_prompt,
+                        history=user.messages,
+                    )
+                    result = await ai.send()
 
-                return await message.answer(result)
-            else:
-                return await message.answer(
-                    "❌ У вас закончились запросы. Оформите Premium, чтобы продолжить общение."
-                )
+                    return await message.answer(result)
+                else:
+                    return await message.answer(
+                        "❌ У вас закончились запросы. Оформите Premium, чтобы продолжить общение."
+                    )
 
         ai = AI(
             prompt=message.text,
