@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -8,6 +8,7 @@ from core.models import User, UserReferral
 async def update_premium(
     session: AsyncSession,
     telegram_id: int,
+    period: int,
 ) -> Optional[User]:
     stmt = select(User).where(User.telegram_id == telegram_id)
     result = await session.execute(stmt)
@@ -18,6 +19,21 @@ async def update_premium(
 
     user.premium = True
     user.buy_premium = datetime.now()
+
+    if user.premium_end and user.premium_end > datetime.now():
+        if period == 1:
+            user.premium_end = user.premium_end + timedelta(days=30)
+        elif period == 3:
+            user.premium_end = user.premium_end + timedelta(days=90)
+        elif period == 6:
+            user.premium_end = user.premium_end + timedelta(days=180)
+    else:
+        if period == 1:
+            user.premium_end = datetime.now() + timedelta(days=30)
+        elif period == 3:
+            user.premium_end = datetime.now() + timedelta(days=90)
+        elif period == 6:
+            user.premium_end = datetime.now() + timedelta(days=180)
 
     await session.commit()
     await session.refresh(user)
