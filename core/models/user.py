@@ -19,16 +19,16 @@ class User(Base):
 
     referrer_is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    referrer_id: Mapped[int] = mapped_column(
+    referrer_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("users.id"), nullable=True
     )
 
-    referrer: Mapped["User"] = relationship(
-        "User", remote_side="User.id", back_populates="referral_users", uselist=False
+    referrer: Mapped["User | None"] = relationship(
+        "User", remote_side="User.id", back_populates="referred_users"
     )
 
-    referral_users: Mapped[list["User"]] = relationship(
-        "User", back_populates="referrer", cascade="all, delete-orphan"
+    referred_users: Mapped[list["User"]] = relationship(
+        "User", remote_side="User.referrer_id", back_populates="referrer"
     )
 
     request_limit: Mapped[int] = mapped_column(Integer, nullable=True)
