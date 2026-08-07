@@ -10,7 +10,11 @@ async def create_user(
     telegram_id: int,
     username: Optional[str] = None,
 ) -> User:
-    stmt = select(User).where(User.telegram_id == telegram_id).options(selectinload(User.referred_users))
+    stmt = (
+        select(User)
+        .where(User.telegram_id == telegram_id)
+        .options(selectinload(User.referred_users))
+    )
     result = await session.execute(stmt)
     existing_user = result.scalar_one_or_none()
 
