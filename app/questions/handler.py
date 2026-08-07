@@ -9,7 +9,7 @@ router = Router()
 @router.message(F.text == "❓ Вопрос-ответ")
 async def questions(message: Message):
     return await message.answer(
-        "Выберите интересующий вас вопрос из списка ниже:",
+        "❓ Вопросы и ответы\n\nВыберите интересующий вас вопрос из списка ниже:",
         reply_markup=questions_menu(),
     )
 
