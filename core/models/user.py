@@ -18,6 +18,9 @@ class User(Base):
     buy_premium: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    premium_end: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     referrer_is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
