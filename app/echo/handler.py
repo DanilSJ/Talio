@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router, F
 from aiogram.types import Message
 from app.echo.crud import (
@@ -17,6 +19,48 @@ MESSAGE_COOLDOWN = 2
 MAX_MESSAGES_PER_MINUTE = 10
 user_message_count = {}
 user_message_reset = {}
+
+
+async def split_and_send_message(message: Message, text: str, max_length: int = 4000):
+    if len(text) <= max_length:
+        return await message.answer(text)
+
+    # Разбиваем текст на части
+    parts = []
+    current_part = ""
+
+    for line in text.split("\n"):
+        if len(current_part) + len(line) + 1 <= max_length:
+            current_part += line + "\n"
+        else:
+            if current_part:
+                parts.append(current_part.strip())
+            current_part = line + "\n"
+
+    if current_part:
+        parts.append(current_part.strip())
+
+    final_parts = []
+    for part in parts:
+        if len(part) <= max_length:
+            final_parts.append(part)
+        else:
+            for i in range(0, len(part), max_length):
+                final_parts.append(part[i : i + max_length])
+
+    for i, part in enumerate(final_parts):
+        if len(final_parts) > 1:
+            part_text = f"📄 Часть {i + 1}/{len(final_parts)}\n\n{part}"
+        else:
+            part_text = part
+
+        await message.answer(part_text)
+
+        # Небольшая задержка между отправками, чтобы избежать ограничений Telegram
+        if i < len(final_parts) - 1:
+            await asyncio.sleep(0.5)
+
+    return None
 
 
 @router.message(F.text)
@@ -68,7 +112,7 @@ async def echo(message: Message):
             )
             result = await ai.send()
 
-            return await message.answer(result)
+            return await split_and_send_message(message, result)
 
         if user.request_limit is not None:
             if user.request_limit >= 3:
@@ -82,7 +126,7 @@ async def echo(message: Message):
                     )
                     result = await ai.send()
 
-                    return await message.answer(result)
+                    return await split_and_send_message(message, result)
                 else:
                     return await message.answer(
                         "❌ У вас закончились запросы. Оформите Premium, чтобы продолжить общение."
@@ -97,4 +141,4 @@ async def echo(message: Message):
 
         await increment_user_request_limit(session, user.telegram_id)
 
-        return await message.answer(result)
+        return await split_and_send_message(message, result)
