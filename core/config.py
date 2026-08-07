@@ -12,7 +12,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 class Settings(BaseSettings):
     BOT_USERNAME: str = os.getenv("BOT_USERNAME")
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN")
-    PROXY: str = os.getenv("PROXY")
+    PROXY: str = os.getenv("PROXY") == "False"
 
     db_url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
     DB_ECHO: bool = os.getenv("DB_ECHO", "False") == "True"
