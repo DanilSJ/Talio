@@ -10,7 +10,7 @@ from .base import Base
 
 class User(Base):
     username: Mapped[str] = mapped_column(String, nullable=True)
-    telegram_id: Mapped[int] = mapped_column(BigInteger)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True)
 
     admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
