@@ -17,9 +17,12 @@ async def account(message: Message):
         )
 
         return await message.answer(
-            f"""Твой ID: {user.telegram_id}
-Регистрация: {user.create_at}
-Премиум: {user.premium}
-Приглашено друзей: {await get_referrals_count(session, message.from_user.id)} чел
-Реферальная ссылка (10% скидна на premium): https://t.me/{settings.BOT_USERNAME}?start={user.telegram_id}"""
+            f"""🆔 <b>Твой ID</b>: {user.telegram_id}
+            
+<b>🗓 Регистрация</b>: {user.create_at}
+<b>💎 Премиум</b>: {user.premium}
+<b>👥 Приглашено друзей</b>: {await get_referrals_count(session, message.from_user.id)} чел
+<b>🌟 Реферальная ссылка (10% скидка на premium)</b>:
+https://t.me/{settings.BOT_USERNAME}?start={user.telegram_id}""",
+            parse_mode="HTML",
         )
