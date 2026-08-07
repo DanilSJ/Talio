@@ -57,6 +57,9 @@ async def echo(message: Message):
         system_prompt = await ai_system_prompt(session)
 
         if user.premium:
+            if datetime.now() >= user.premium_end:
+                return await message.answer("Ваш Premium закончился")
+
             ai = AI(
                 prompt=message.text,
                 system_prompt=system_prompt,
