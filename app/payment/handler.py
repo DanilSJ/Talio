@@ -60,7 +60,7 @@ async def create_payment(message: Message, state: FSMContext):
 async def payment_check(callback: CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
     if current_state != PaymentState.payment_id:
-        await callback.answer("❌ Нет активного платежа")
+        await callback.message.answer("❌ Нет активного платежа")
         return
 
     data = await state.get_data()
@@ -70,15 +70,19 @@ async def payment_check(callback: CallbackQuery, state: FSMContext):
 
         if payment.status == "succeeded":
             async with db_helper.scoped_session_dependency() as session:
-                await update_premium(session, callback.message.from_user.id)
+                await update_premium(session, callback.from_user.id)
                 await del_referrer(session, callback.message.from_user.id)
-                await callback.answer("✅ Платеж оплачен! Подписка активирована!")
+                await callback.message.answer(
+                    "✅ Платеж оплачен! Подписка активирована!"
+                )
+                await state.clear()
         elif payment.status == "pending" or payment.status == "waiting_for_capture":
-            await callback.answer("⏳ Платеж еще не оплачен")
+            await callback.message.answer("⏳ Платеж еще не оплачен")
         elif payment.status == "canceled":
-            await callback.answer("❌ Платеж отменен")
+            await callback.message.answer("❌ Платеж отменен")
+            await state.clear()
         else:
-            await callback.answer(f"ℹ️ Статус: {payment.status}")
+            await callback.message.answer(f"ℹ️ Статус: {payment.status}")
 
     except Exception as e:
         await callback.answer(f"❌ Ошибка: {str(e)}")
