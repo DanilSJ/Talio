@@ -53,10 +53,15 @@ async def increment_user_request_limit(
     result = await session.execute(stmt)
     user = result.scalar_one_or_none()
 
-    if not user or user.request_limit is None:
+    if not user:
         return None
 
-    user.request_limit = user.request_limit + 1
+    if user.request_limit is None:
+        user.request_limit = 1
+    else:
+        user.request_limit = user.request_limit + 1
+
+    user.request_reload = datetime.now() + timedelta(days=1)
 
     await session.commit()
     await session.refresh(user)
