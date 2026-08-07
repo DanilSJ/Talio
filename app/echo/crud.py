@@ -71,6 +71,7 @@ async def ai_system_prompt(session: AsyncSession) -> str:
 
     return system_prompt if system_prompt is not None else "default_prompt"
 
+
 async def deactivate_premium(
     session: AsyncSession,
     telegram_id: int,
