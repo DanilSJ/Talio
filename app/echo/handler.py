@@ -129,7 +129,7 @@ async def echo(message: Message):
                     return await split_and_send_message(message, result)
                 else:
                     return await message.answer(
-                        "❌ У вас закончились запросы. Оформите Premium, чтобы продолжить общение."
+                        "❌ У вас закончились запросы. Оформите Premium, чтобы продолжить общение или ждите следующего дня чтобы вернуть лимиты."
                     )
 
         ai = AI(
