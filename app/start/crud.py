@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.models import User
+from core.models.user import UserReferral
 
 
 async def create_user(
@@ -44,9 +45,19 @@ from typing import Optional
 
 async def add_referrer(
     session: AsyncSession,
-    invited_telegram_id: int,
+    user_telegram_id: int,
     referrer_telegram_id: int,
 ) -> Optional[User]:
+    if user_telegram_id == referrer_telegram_id:
+        return None
+
+    stmt_user = select(User).where(User.telegram_id == user_telegram_id)
+    result_user = await session.execute(stmt_user)
+    user = result_user.scalar_one_or_none()
+
+    if not user:
+        return None
+
     stmt_referrer = select(User).where(User.telegram_id == referrer_telegram_id)
     result_referrer = await session.execute(stmt_referrer)
     referrer = result_referrer.scalar_one_or_none()
@@ -54,25 +65,25 @@ async def add_referrer(
     if not referrer:
         return None
 
-    stmt_invited = select(User).where(User.telegram_id == invited_telegram_id)
-    result_invited = await session.execute(stmt_invited)
-    invited_user = result_invited.scalar_one_or_none()
+    stmt_existing = select(UserReferral).where(
+        UserReferral.user_id == user.id, UserReferral.referrer_id == referrer.id
+    )
+    result_existing = await session.execute(stmt_existing)
+    existing = result_existing.scalar_one_or_none()
 
-    if not invited_user:
+    if existing:
+        if not existing.is_active:
+            existing.is_active = True
+            await session.commit()
+            return user
         return None
 
-    if invited_user.referrer_id is not None:
-        return None
+    referral = UserReferral(user_id=referrer.id, referrer_id=user.id, is_active=True)
 
-    if invited_telegram_id == referrer_telegram_id:
-        return None
-
-    invited_user.referrer_id = referrer.id
-    invited_user.referrer_is_active = True
-
+    session.add(referral)
     await session.commit()
 
-    await session.refresh(invited_user)
+    await session.refresh(user)
     await session.refresh(referrer)
 
-    return invited_user
+    return user
