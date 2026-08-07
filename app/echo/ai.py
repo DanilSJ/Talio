@@ -41,9 +41,12 @@ class AI:
             }
         )
 
-        result = await self.client.chat.completions.create(
-            model="deepseek-v4-flash",
-            messages=messages,
-        )
+        try:
+            result = await self.client.chat.completions.create(
+                model="deepseek-v4-flash",
+                messages=messages,
+            )
 
-        return result.choices[0].message.content
+            return result.choices[0].message.content
+        except Exception:
+            return "ERROR: возможно закончились деньги на балансе"
