@@ -15,12 +15,15 @@ async def account(message: Message):
         user = await create_user(
             session, message.from_user.id, message.from_user.username
         )
-
+        if user.premium:
+            prem = "✅"
+        else:
+            prem = "❌"
         return await message.answer(
             f"""🆔 <b>Твой ID</b>: {user.telegram_id}
             
 <b>🗓 Регистрация</b>: {user.create_at}
-<b>💎 Премиум</b>: {user.premium}
+<b>💎 Премиум</b>: {prem}
 <b>👥 Приглашено друзей</b>: {await get_referrals_count(session, message.from_user.id)} чел
 <b>🌟 Реферальная ссылка (10% скидка на premium)</b>:
 https://t.me/{settings.BOT_USERNAME}?start={user.telegram_id}""",
