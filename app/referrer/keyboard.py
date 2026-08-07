@@ -19,7 +19,10 @@ def referrer_keyboard(url: str):
                 InlineKeyboardButton(
                     text="Отправить друзьям",
                     switch_inline_query_chosen_chat=SwitchInlineQueryChosenChat(
-                        query=url
+                        query=url,
+                        allow_user_chats=True,
+                        allow_group_chats=True,
+                        allow_channel_chats=False,
                     ),
                 ),
             ],
