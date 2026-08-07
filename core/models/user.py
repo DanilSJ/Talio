@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import String, BigInteger, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import DateTime
@@ -19,18 +21,18 @@ class User(Base):
 
     referrer_is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    referrer_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("users.id"), nullable=True
+    referrers: Mapped[List["UserReferral"]] = relationship(
+        "UserReferral",
+        foreign_keys="UserReferral.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
-    referrer: Mapped["User | None"] = relationship(
-        "User", remote_side="User.id", back_populates="referred_users"
+    referred_users: Mapped[List["UserReferral"]] = relationship(
+        "UserReferral",
+        foreign_keys="UserReferral.referrer_id",
+        back_populates="referrer",
     )
-
-    referred_users: Mapped[list["User"]] = relationship(
-        "User", remote_side="User.referrer_id", back_populates="referrer"
-    )
-
     request_limit: Mapped[int] = mapped_column(Integer, nullable=True)
     request_reload: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
@@ -38,4 +40,18 @@ class User(Base):
 
     messages: Mapped[list["Message"]] = relationship(
         "Message", back_populates="user", cascade="all, delete-orphan"
+    )
+
+
+class UserReferral(Base):
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    referrer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    user: Mapped["User"] = relationship(
+        "User", foreign_keys=[user_id], back_populates="referrers"
+    )
+    referrer: Mapped["User"] = relationship(
+        "User", foreign_keys=[referrer_id], back_populates="referred_users"
     )
