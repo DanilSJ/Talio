@@ -35,15 +35,17 @@ async def admin(message: Message):
 async def admin_system_prompt(callback: CallbackQuery, state: FSMContext):
     async with db_helper.scoped_session_dependency() as session:
         user = await create_user(
-            session, callback.message.from_user.id, callback.message.from_user.username
+            session, callback.from_user.id, callback.from_user.username
         )
         if not user.admin:
             return None
 
         system_prompt = await ai_system_prompt(session)
 
-        await callback.answer(f"Текст в данный момент: {system_prompt}")
-        await callback.answer("Напишите текст который будет в системном промпте")
+        await callback.message.answer(f"Текст в данный момент: {system_prompt}")
+        await callback.message.answer(
+            "Напишите текст который будет в системном промпте"
+        )
         await state.set_state(AdminSystemPromptState.text)
 
 
@@ -66,12 +68,12 @@ async def admin_set_system_prompt(message: Message, state: FSMContext):
 async def admin_ads(callback: CallbackQuery, state: FSMContext):
     async with db_helper.scoped_session_dependency() as session:
         user = await create_user(
-            session, callback.message.from_user.id, callback.message.from_user.username
+            session, callback.from_user.id, callback.from_user.username
         )
         if not user.admin:
             return None
 
-        await callback.answer("Напишите текст который будет рассылаться")
+        await callback.message.answer("Напишите текст который будет рассылаться")
         await state.set_state(AdminADSState.text)
 
 
@@ -100,7 +102,7 @@ async def admin_send_ads(message: Message, state: FSMContext):
 async def admin_ads(callback: CallbackQuery):
     async with db_helper.scoped_session_dependency() as session:
         user = await create_user(
-            session, callback.message.from_user.id, callback.message.from_user.username
+            session, callback.from_user.id, callback.from_user.username
         )
         if not user.admin:
             return None
@@ -109,7 +111,7 @@ async def admin_ads(callback: CallbackQuery):
 
         if not messages:
             stats_text = "📊 В базе пока нет сообщений"
-            return await callback.answer(stats_text)
+            return await callback.message.answer(stats_text)
 
         stats = calculate_stats(messages)
 
