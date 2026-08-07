@@ -70,3 +70,21 @@ async def ai_system_prompt(session: AsyncSession) -> str:
     system_prompt = result.scalar_one_or_none()
 
     return system_prompt if system_prompt is not None else "default_prompt"
+
+async def deactivate_premium(
+    session: AsyncSession,
+    telegram_id: int,
+) -> Optional[User]:
+    stmt = select(User).where(User.telegram_id == telegram_id)
+    result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return None
+
+    user.premium = False
+
+    await session.commit()
+    await session.refresh(user)
+
+    return user
