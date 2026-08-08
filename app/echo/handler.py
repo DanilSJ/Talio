@@ -54,7 +54,7 @@ async def split_and_send_message(message: Message, text: str, max_length: int = 
         else:
             part_text = part
 
-        await message.answer(part_text)
+        await message.answer(part_text, parse_mode="Markdown")
 
         # Небольшая задержка между отправками, чтобы избежать ограничений Telegram
         if i < len(final_parts) - 1:
