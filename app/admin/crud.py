@@ -24,6 +24,32 @@ async def set_ai_system_prompt(session: AsyncSession, text: str) -> bool:
     return True
 
 
+async def set_on_off_qwen(session: AsyncSession) -> bool:
+    stmt = select(AI).order_by(desc(AI.id)).limit(1)
+    result = await session.execute(stmt)
+    ai = result.scalar_one_or_none()
+    print("dd")
+    if not ai:
+        print("xxxx")
+        ai = AI(system_prompt="default", qwen_use=True)
+        session.add(ai)
+        await session.commit()
+        await session.refresh(ai)
+        return True
+    else:
+        print("zzz")
+        if ai.qwen_use:
+            ai.qwen_use = False
+            await session.commit()
+            await session.refresh(ai)
+            return False
+        else:
+            ai.qwen_use = True
+            await session.commit()
+            await session.refresh(ai)
+            return True
+
+
 async def get_messages(session: AsyncSession) -> Optional[List[Message]]:
     stmt = select(Message)
     result = await session.execute(stmt)
