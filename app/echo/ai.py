@@ -58,5 +58,5 @@ class AI:
             )
 
             return result.choices[0].message.content
-        except Exception:
-            return "ERROR: возможно закончились деньги на балансе"
+        except Exception as e:
+            return f"ERROR: возможно закончились деньги на балансе({e})"

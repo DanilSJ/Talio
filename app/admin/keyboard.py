@@ -28,6 +28,12 @@ def admin_keyboard():
                     callback_data="on_off_qwen",
                 ),
             ],
+            [
+                InlineKeyboardButton(
+                    text="Количество пользователей",
+                    callback_data="how_users",
+                ),
+            ],
         ]
     )
 
