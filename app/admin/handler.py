@@ -183,3 +183,16 @@ async def on_off_qwen(callback: CallbackQuery):
             return await callback.message.answer("QWEN был включен")
         else:
             return await callback.message.answer("QWEN был отключен")
+
+
+@router.callback_query(F.data == "how_users")
+async def how_users(callback: CallbackQuery):
+    async with db_helper.scoped_session_dependency() as session:
+        user = await create_user(
+            session, callback.from_user.id, callback.from_user.username
+        )
+        if not user.admin:
+            return None
+        result = await get_users(session)
+
+        return await callback.message.answer(f"Пользователей: {len(result)}")
