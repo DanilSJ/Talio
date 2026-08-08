@@ -4,10 +4,15 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from app.admin.crud import set_ai_system_prompt, get_messages, get_users
+from app.admin.crud import (
+    set_ai_system_prompt,
+    get_messages,
+    get_users,
+    set_on_off_qwen,
+)
 from app.admin.keyboard import admin_keyboard
 from app.admin.state import AdminSystemPromptState, AdminADSState
-from app.echo.crud import ai_system_prompt
+from app.echo.crud import get_ai
 from app.start.crud import create_user
 from core.models import db_helper
 
@@ -40,9 +45,9 @@ async def admin_system_prompt(callback: CallbackQuery, state: FSMContext):
         if not user.admin:
             return None
 
-        system_prompt = await ai_system_prompt(session)
+        ai = await get_ai(session)
 
-        await callback.message.answer(f"Текст в данный момент: {system_prompt}")
+        await callback.message.answer(f"Текст в данный момент: {ai.system_prompt}")
         await callback.message.answer(
             "Напишите текст который будет в системном промпте"
         )
@@ -133,7 +138,7 @@ async def admin_ads(callback: CallbackQuery):
 
         await callback.message.answer(stats_text)
 
-        return await callback.answer("Напишите текст который будет рассылаться")
+        return await callback.message.answer("Напишите текст который будет рассылаться")
 
 
 def calculate_stats(messages):
@@ -162,3 +167,19 @@ def calculate_stats(messages):
         "total_count": len(messages),
         "top_users": top_users,
     }
+
+
+@router.callback_query(F.data == "on_off_qwen")
+async def on_off_qwen(callback: CallbackQuery):
+    async with db_helper.scoped_session_dependency() as session:
+        user = await create_user(
+            session, callback.from_user.id, callback.from_user.username
+        )
+        if not user.admin:
+            return None
+        result = await set_on_off_qwen(session)
+
+        if result:
+            return await callback.message.answer("QWEN был включен")
+        else:
+            return await callback.message.answer("QWEN был отключен")
