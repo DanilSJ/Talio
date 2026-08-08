@@ -22,6 +22,12 @@ def admin_keyboard():
                     callback_data="admin_messages",
                 ),
             ],
+            [
+                InlineKeyboardButton(
+                    text="Включить/отключить QWEN",
+                    callback_data="on_off_qwen",
+                ),
+            ],
         ]
     )
 
