@@ -102,8 +102,9 @@ async def echo(message: Message):
         settings_ai = await get_ai(session)
 
         if user.premium or user.admin:
-            if datetime.now() >= user.premium_end:
-                return await message.answer("Ваш Premium закончился")
+            if user.premium_end:
+                if datetime.now() >= user.premium_end:
+                    return await message.answer("Ваш Premium закончился")
 
             ai = AI(
                 prompt=message.text,
