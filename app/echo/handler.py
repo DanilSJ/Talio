@@ -1,11 +1,12 @@
 import asyncio
 
 from aiogram import Router, F
+from aiogram.enums.parse_mode import ParseMode
 from aiogram.types import Message
 from app.echo.crud import (
     reset_user_requests,
     increment_user_request_limit,
-    ai_system_prompt,
+    get_ai,
 )
 from app.start.crud import create_user
 from app.echo.ai import AI
@@ -54,7 +55,7 @@ async def split_and_send_message(message: Message, text: str, max_length: int = 
         else:
             part_text = part
 
-        await message.answer(part_text, parse_mode="Markdown")
+        await message.answer(part_text, parse_mode=ParseMode.MARKDOWN_V2)
 
         # Небольшая задержка между отправками, чтобы избежать ограничений Telegram
         if i < len(final_parts) - 1:
@@ -98,15 +99,16 @@ async def echo(message: Message):
             session, message.from_user.id, message.from_user.username
         )
 
-        system_prompt = await ai_system_prompt(session)
+        settings_ai = await get_ai(session)
 
-        if user.premium:
+        if user.premium or user.admin:
             if datetime.now() >= user.premium_end:
                 return await message.answer("Ваш Premium закончился")
 
             ai = AI(
                 prompt=message.text,
-                system_prompt=system_prompt,
+                system_prompt=settings_ai.system_prompt,
+                qwen_use=settings_ai.qwen_use,
                 history=user.messages,
                 limit=100,
             )
@@ -121,7 +123,8 @@ async def echo(message: Message):
 
                     ai = AI(
                         prompt=message.text,
-                        system_prompt=system_prompt,
+                        system_prompt=settings_ai.system_prompt,
+                        qwen_use=settings_ai.qwen_use,
                         history=user.messages,
                     )
                     result = await ai.send()
@@ -134,7 +137,8 @@ async def echo(message: Message):
 
         ai = AI(
             prompt=message.text,
-            system_prompt=system_prompt,
+            system_prompt=settings_ai.system_prompt,
+            qwen_use=settings_ai.qwen_use,
             history=user.messages,
         )
         result = await ai.send()
