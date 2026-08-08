@@ -17,7 +17,7 @@ async def questions(message: Message):
 @router.callback_query(F.data == "question_1")
 async def question_1(callback: CallbackQuery):
     return await callback.message.answer(
-        """*TALIO* - то AI-система по раскрытию и монетизации вашего потенциала.
+        """*TALIO* - это AI-система по раскрытию и монетизации вашего потенциала.
 
 У каждого человека есть активы, которые остаются нераскрытыми. Наш ассистент помогает обнаружить их, развить и превратить в возможности.
 
