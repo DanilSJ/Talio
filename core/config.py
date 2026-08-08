@@ -22,6 +22,8 @@ class Settings(BaseSettings):
 
     DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY")
     DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL")
+    QWEN_API_KEY: str = os.getenv("QWEN_API_KEY")
+    QWEN_BASE_URL: str = os.getenv("QWEN_BASE_URL")
 
     YOOKASSA_ID: int = os.getenv("YOOKASSA_ID")
     YOOKASSA_KEY: str = os.getenv("YOOKASSA_KEY")
