@@ -3,11 +3,21 @@ from core.config import settings
 
 
 class AI:
-    def __init__(self, prompt: str, system_prompt: str, history, limit: int = 10):
-        self.client = AsyncClient(
-            base_url=settings.DEEPSEEK_BASE_URL,
-            api_key=settings.DEEPSEEK_API_KEY,
-        )
+    def __init__(
+        self, prompt: str, system_prompt: str, qwen_use: bool, history, limit: int = 10
+    ):
+        if not qwen_use:
+            self.client = AsyncClient(
+                base_url=settings.DEEPSEEK_BASE_URL,
+                api_key=settings.DEEPSEEK_API_KEY,
+            )
+            self.model = "deepseek-v4-flash"
+        else:
+            self.client = AsyncClient(
+                base_url=settings.QWEN_BASE_URL,
+                api_key=settings.QWEN_API_KEY,
+            )
+            self.model = "qwen3.7-plus"
         self.prompt = prompt
         self.history = history
         self.system_prompt = system_prompt
