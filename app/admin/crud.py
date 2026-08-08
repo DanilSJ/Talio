@@ -34,6 +34,7 @@ async def get_messages(session: AsyncSession) -> Optional[List[Message]]:
 
     return list(messages)
 
+
 async def get_users(session: AsyncSession):
     stmt = select(User)
     result = await session.execute(stmt)

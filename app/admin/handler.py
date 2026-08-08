@@ -91,15 +91,14 @@ async def admin_send_ads(message: Message, state: FSMContext):
 
         for user in users:
             try:
-                await message.copy_to(
-                    chat_id=user.telegram_id
-                )
+                await message.copy_to(chat_id=user.telegram_id)
             except Exception as e:
                 print(f"Ошибка при отправке пользователю {user.telegram_id}: {e}")
                 continue
 
         await state.clear()
         return await message.answer("Рассылка была отправлена")
+
 
 @router.callback_query(F.data == "admin_messages")
 async def admin_ads(callback: CallbackQuery):
