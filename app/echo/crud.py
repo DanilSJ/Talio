@@ -69,12 +69,12 @@ async def increment_user_request_limit(
     return user
 
 
-async def ai_system_prompt(session: AsyncSession) -> str:
-    stmt = select(AI.system_prompt).order_by(desc(AI.id)).limit(1)
+async def get_ai(session: AsyncSession):
+    stmt = select(AI).order_by(desc(AI.id)).limit(1)
     result = await session.execute(stmt)
-    system_prompt = result.scalar_one_or_none()
+    ai = result.scalar_one_or_none()
 
-    return system_prompt if system_prompt is not None else "default_prompt"
+    return ai
 
 
 async def deactivate_premium(
