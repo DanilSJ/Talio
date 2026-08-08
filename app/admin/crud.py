@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
-from core.models import AI, Message
+from core.models import AI, Message, User
 from typing import Optional, List
 
 
@@ -33,3 +33,13 @@ async def get_messages(session: AsyncSession) -> Optional[List[Message]]:
         return None
 
     return list(messages)
+
+async def get_users(session: AsyncSession):
+    stmt = select(User)
+    result = await session.execute(stmt)
+    users = result.scalars().all()
+
+    if not users:
+        return None
+
+    return users

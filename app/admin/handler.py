@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from app.admin.crud import set_ai_system_prompt, get_messages
+from app.admin.crud import set_ai_system_prompt, get_messages, get_users
 from app.admin.keyboard import admin_keyboard
 from app.admin.state import AdminSystemPromptState, AdminADSState
 from app.echo.crud import ai_system_prompt
@@ -79,7 +79,6 @@ async def admin_ads(callback: CallbackQuery, state: FSMContext):
 
 @router.message(AdminADSState.text)
 async def admin_send_ads(message: Message, state: FSMContext):
-    await state.update_data(text=message.text)
     async with db_helper.scoped_session_dependency() as session:
         user = await create_user(
             session, message.from_user.id, message.from_user.username
@@ -87,16 +86,20 @@ async def admin_send_ads(message: Message, state: FSMContext):
         if not user.admin:
             return None
 
-        try:
-            await message.bot.forward_message(
-                message.chat.id, message.chat.id, message.message_id
-            )
-        except Exception:
-            pass
+        # Получаем всех пользователей
+        users = await get_users(session)
+
+        for user in users:
+            try:
+                await message.copy_to(
+                    chat_id=user.telegram_id
+                )
+            except Exception as e:
+                print(f"Ошибка при отправке пользователю {user.telegram_id}: {e}")
+                continue
 
         await state.clear()
         return await message.answer("Рассылка была отправлена")
-
 
 @router.callback_query(F.data == "admin_messages")
 async def admin_ads(callback: CallbackQuery):
