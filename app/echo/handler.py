@@ -7,6 +7,7 @@ from app.echo.crud import (
     reset_user_requests,
     increment_user_request_limit,
     get_ai,
+    create_user_message,
 )
 from app.start.crud import create_user
 from app.echo.ai import AI
@@ -114,7 +115,12 @@ async def echo(message: Message):
                 limit=100,
             )
             result = await ai.send()
-
+            await create_user_message(
+                session,
+                telegram_id=user.telegram_id,
+                question=message.text,
+                answer=result,
+            )
             return await split_and_send_message(message, result)
 
         if user.request_limit is not None:
@@ -129,7 +135,12 @@ async def echo(message: Message):
                         history=user.messages,
                     )
                     result = await ai.send()
-
+                    await create_user_message(
+                        session,
+                        telegram_id=user.telegram_id,
+                        question=message.text,
+                        answer=result,
+                    )
                     return await split_and_send_message(message, result)
                 else:
                     return await message.answer(
@@ -143,7 +154,12 @@ async def echo(message: Message):
             history=user.messages,
         )
         result = await ai.send()
-
+        await create_user_message(
+            session,
+            telegram_id=user.telegram_id,
+            question=message.text,
+            answer=result,
+        )
         await increment_user_request_limit(session, user.telegram_id)
 
         return await split_and_send_message(message, result)
