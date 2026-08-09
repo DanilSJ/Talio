@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
-from core.models import User, AI
+from core.models import User, AI, Message
 
 
 async def update_user_request_limits(
@@ -94,3 +94,30 @@ async def deactivate_premium(
     await session.refresh(user)
 
     return user
+
+
+async def create_user_message(
+    session: AsyncSession,
+    telegram_id: int,
+    question: str,
+    answer: Optional[str] = None,
+) -> Optional[Message]:
+    stmt = select(User).where(User.telegram_id == telegram_id)
+    result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return None
+
+    # Создаем новое сообщение
+    new_message = Message(
+        question=question,
+        answer=answer,
+        user_id=user.id,
+    )
+
+    session.add(new_message)
+    await session.commit()
+    await session.refresh(new_message)
+
+    return new_message
