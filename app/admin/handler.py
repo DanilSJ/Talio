@@ -17,7 +17,6 @@ from app.start.crud import create_user
 from core.models import db_helper
 
 router = Router()
-MSK = timezone(timedelta(hours=3))
 
 
 @router.message(Command("admin"))
@@ -106,7 +105,7 @@ async def admin_send_ads(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "admin_messages")
-async def admin_ads(callback: CallbackQuery):
+async def admin_messages(callback: CallbackQuery):
     async with db_helper.scoped_session_dependency() as session:
         user = await create_user(
             session, callback.from_user.id, callback.from_user.username
@@ -136,14 +135,12 @@ async def admin_ads(callback: CallbackQuery):
         else:
             stats_text += "За неделю нет сообщений"
 
-        await callback.message.answer(stats_text)
-
-        return await callback.message.answer("Напишите текст который будет рассылаться")
+        return await callback.message.answer(stats_text)
 
 
 def calculate_stats(messages):
-    now = datetime.now(MSK)
-    today_start = datetime(now.year, now.month, now.day, tzinfo=MSK)
+    now = datetime.now()  # без часового пояса
+    today_start = datetime(now.year, now.month, now.day)
     week_ago = now - timedelta(days=7)
 
     today_count = 0
@@ -151,10 +148,15 @@ def calculate_stats(messages):
     week_users = Counter()
 
     for msg in messages:
-        if msg.create_at >= today_start:
+        # Если msg.create_at имеет часовой пояс, убираем его
+        msg_time = msg.create_at
+        if msg_time.tzinfo is not None:
+            msg_time = msg_time.replace(tzinfo=None)
+
+        if msg_time >= today_start:
             today_count += 1
 
-        if msg.create_at >= week_ago:
+        if msg_time >= week_ago:
             week_count += 1
             if msg.user and msg.user.username:
                 week_users[msg.user.username] += 1
