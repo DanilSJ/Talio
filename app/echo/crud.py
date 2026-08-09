@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, func
 from core.models import User, AI, Message
 
 
@@ -121,3 +121,34 @@ async def create_user_message(
     await session.refresh(new_message)
 
     return new_message
+
+
+async def get_inactive_users(session: AsyncSession, days_threshold: int = 3):
+    """
+    Получает пользователей, которые не создавали сообщения более указанного количества дней.
+
+    Args:
+        session: Асинхронная сессия SQLAlchemy
+        days_threshold: Количество дней бездействия (по умолчанию 3)
+
+    Returns:
+        List[User]: Список пользователей, не писавших более days_threshold дней
+    """
+    # Вычисляем дату, которая была days_threshold дней назад
+    threshold_date = datetime.now() - timedelta(days=days_threshold)
+
+    # Правильный запрос с использованием Message.created_at
+    stmt = (
+        select(User)
+        .outerjoin(Message, User.id == Message.user_id)  # Явный JOIN
+        .group_by(User.id)
+        .having(
+            func.max(Message.create_at)
+            < threshold_date  # Используем Message.created_at
+        )
+    )
+
+    result = await session.execute(stmt)
+    inactive_users = result.scalars().all()
+
+    return inactive_users

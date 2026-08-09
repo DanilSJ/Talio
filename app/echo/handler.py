@@ -103,7 +103,7 @@ async def echo(message: Message):
         settings_ai = await get_ai(session)
 
         if user.premium or user.admin:
-            if user.premium_end:
+            if user.premium_end and not user.admin:
                 if datetime.now() >= user.premium_end:
                     return await message.answer("Ваш Premium закончился")
 
@@ -131,7 +131,7 @@ async def echo(message: Message):
                     ai = AI(
                         prompt=message.text,
                         system_prompt=settings_ai.system_prompt,
-                        qwen_use=settings_ai.qwen_use,
+                        qwen_use=False,
                         history=user.messages,
                     )
                     result = await ai.send()
@@ -150,7 +150,7 @@ async def echo(message: Message):
         ai = AI(
             prompt=message.text,
             system_prompt=settings_ai.system_prompt,
-            qwen_use=settings_ai.qwen_use,
+            qwen_use=False,
             history=user.messages,
         )
         result = await ai.send()

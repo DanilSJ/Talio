@@ -38,4 +38,5 @@ async def start(message: Message):
 
 Верю в вас! 😊""",
         reply_markup=main_menu(),
+        parse_mode="HTML",
     )
