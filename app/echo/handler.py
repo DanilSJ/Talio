@@ -24,7 +24,7 @@ user_message_reset = {}
 
 async def split_and_send_message(message: Message, text: str, max_length: int = 4000):
     if len(text) <= max_length:
-        return await message.answer(text)
+        return await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 
     # Разбиваем текст на части
     parts = []
@@ -55,7 +55,7 @@ async def split_and_send_message(message: Message, text: str, max_length: int = 
         else:
             part_text = part
 
-        await message.answer(part_text, parse_mode=ParseMode.MARKDOWN_V2)
+        await message.answer(part_text, parse_mode=ParseMode.MARKDOWN)
 
         # Небольшая задержка между отправками, чтобы избежать ограничений Telegram
         if i < len(final_parts) - 1:
