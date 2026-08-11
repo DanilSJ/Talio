@@ -19,13 +19,16 @@ dp = Dispatcher()
 async def background_task():
     while True:
         async with db_helper.scoped_session_dependency() as session:
-            users = await get_inactive_users(session)
-            for el in users:
-                await bot.send_message(
-                    chat_id=el.telegram_id,
-                    text="Привет! Как твои дела, как успехи, нужна ли какая-то помощь? Не останавливайся и не сдавайся, мы обязательно придем к нужным результатам!",
-                )
-            await asyncio.sleep(360)
+            try:
+                users = await get_inactive_users(session)
+                for el in users:
+                    await bot.send_message(
+                        chat_id=el.telegram_id,
+                        text="Привет! Как твои дела, как успехи, нужна ли какая-то помощь? Не останавливайся и не сдавайся, мы обязательно придем к нужным результатам!",
+                    )
+                await asyncio.sleep(360)
+            except Exception as e:
+                print(f"3 day:  {e}")
 
 
 async def main():

@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
+from sqlalchemy.orm import selectinload
+
 from core.models import AI, Message, User
 from typing import Optional, List
 
@@ -48,7 +50,7 @@ async def set_on_off_qwen(session: AsyncSession) -> bool:
 
 
 async def get_messages(session: AsyncSession) -> Optional[List[Message]]:
-    stmt = select(Message)
+    stmt = select(Message).options(selectinload(Message.user))
     result = await session.execute(stmt)
     messages = result.scalars().all()
 

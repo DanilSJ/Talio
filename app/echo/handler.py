@@ -23,7 +23,7 @@ user_message_count = {}
 user_message_reset = {}
 
 
-async def split_and_send_message(message: Message, text: str, max_length: int = 4000):
+async def split_and_send_message(message, text: str, max_length: int = 4000):
     if len(text) <= max_length:
         return await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 

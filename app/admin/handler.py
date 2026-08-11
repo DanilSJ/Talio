@@ -13,6 +13,7 @@ from app.admin.crud import (
 from app.admin.keyboard import admin_keyboard
 from app.admin.state import AdminSystemPromptState, AdminADSState
 from app.echo.crud import get_ai
+from app.echo.handler import split_and_send_message
 from app.start.crud import create_user
 from core.models import db_helper
 
@@ -46,7 +47,9 @@ async def admin_system_prompt(callback: CallbackQuery, state: FSMContext):
 
         ai = await get_ai(session)
 
-        await callback.message.answer(f"Текст в данный момент: {ai.system_prompt}")
+        await split_and_send_message(
+            callback.message, f"Текст в данный момент: {ai.system_prompt}"
+        )
         await callback.message.answer(
             "Напишите текст который будет в системном промпте"
         )
