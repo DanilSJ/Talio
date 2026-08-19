@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 
@@ -15,20 +16,43 @@ else:
 
 dp = Dispatcher()
 
+# Словарь для хранения времени последнего отправленного сообщения
+# Ключ: telegram_id, Значение: datetime последнего отправления
+last_message_time = {}
+
 
 async def background_task():
     while True:
         async with db_helper.scoped_session_dependency() as session:
             try:
                 users = await get_inactive_users(session)
+                current_time = datetime.now()
+
                 for el in users:
+                    user_id = el.telegram_id
+
+                    # Проверяем, отправляли ли мы сообщение этому пользователю
+                    if user_id in last_message_time:
+                        # Если отправляли, проверяем прошло ли 3 дня (72 часа)
+                        time_diff = current_time - last_message_time[user_id]
+                        if time_diff < timedelta(days=3):
+                            # Если прошло меньше 3 дней - пропускаем
+                            continue
+
+                    # Отправляем сообщение
                     await bot.send_message(
-                        chat_id=el.telegram_id,
-                        text="Привет! Как твои дела, как успехи, нужна ли какая-то помощь? Не останавливайся и не сдавайся, мы обязательно придем к нужным результатам!",
+                        chat_id=user_id,
+                        text="Привет! Как твои дела, как успехи, нужна ли какая-то помощь? Не останавливайся и не сдавайся у тебя обязательно все получится!",
                     )
-                await asyncio.sleep(360)
+
+                    # Обновляем время отправки в словаре
+                    last_message_time[user_id] = current_time
+
+                await asyncio.sleep(360)  # Проверка каждые 6 минут
+
             except Exception as e:
-                print(f"3 day:  {e}")
+                print(f"Ошибка в background_task: {e}")
+                await asyncio.sleep(60)  # При ошибке ждем минуту
 
 
 async def main():
