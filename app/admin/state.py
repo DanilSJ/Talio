@@ -7,3 +7,6 @@ class AdminSystemPromptState(StatesGroup):
 
 class AdminADSState(StatesGroup):
     text = State()
+
+class AdminPremiumState(StatesGroup):
+    telegram_id = State()

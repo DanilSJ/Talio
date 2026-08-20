@@ -11,9 +11,10 @@ from app.admin.crud import (
     set_on_off_qwen,
 )
 from app.admin.keyboard import admin_keyboard
-from app.admin.state import AdminSystemPromptState, AdminADSState
+from app.admin.state import AdminSystemPromptState, AdminADSState, AdminPremiumState
 from app.echo.crud import get_ai
 from app.echo.handler import split_and_send_message
+from app.payment.crud import update_premium
 from app.start.crud import create_user
 from core.models import db_helper
 
@@ -201,3 +202,32 @@ async def how_users(callback: CallbackQuery):
         result = await get_users(session)
 
         return await callback.message.answer(f"Пользователей: {len(result)}")
+
+@router.callback_query(F.data == "add_premium")
+async def add_premium(callback: CallbackQuery, state: FSMContext):
+    async with db_helper.scoped_session_dependency() as session:
+        user = await create_user(
+            session, callback.from_user.id, callback.from_user.username
+        )
+        if not user.admin:
+            return None
+
+        await callback.message.answer(
+            "Напишите Telegram ID которому выдадим Premium"
+        )
+        await state.set_state(AdminPremiumState.telegram_id)
+
+
+@router.message(F.text, AdminPremiumState.telegram_id)
+async def add_premium_complete(message: Message, state: FSMContext):
+    await state.update_data(telegram_id=message.text)
+    async with db_helper.scoped_session_dependency() as session:
+        user = await create_user(
+            session, message.from_user.id, message.from_user.username
+        )
+        if not user.admin:
+            return None
+
+        await update_premium(session, int(message.text), 1)
+        await state.clear()
+        return await message.answer("Выдан Premium пользователю на месяц")

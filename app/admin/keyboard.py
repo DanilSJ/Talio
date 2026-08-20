@@ -34,6 +34,12 @@ def admin_keyboard():
                     callback_data="how_users",
                 ),
             ],
+            [
+                InlineKeyboardButton(
+                    text="Выдать премиум",
+                    callback_data="add_premium",
+                ),
+            ],
         ]
     )
 
